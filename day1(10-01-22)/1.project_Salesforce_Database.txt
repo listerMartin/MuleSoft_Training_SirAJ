@@ -1,0 +1,2 @@
+Expose an endpoint /account
+This API will retrieve 5 account records in Salesforce and insert in MySQL table tbl_accounts. You can select 5 columns of Account object to insert
