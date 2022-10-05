@@ -1,0 +1,16 @@
+http:
+  host: "localhost"
+  port: "8081"
+  path: "/account"
+  
+sfdc:
+  username: "listermartin.08@gmail.com"
+  password: "listerMartin08"
+  token: "MFXQ6GV5W13wQDMv8mMHE5XP"
+  
+db:
+  host: "localhost"
+  port: "3306"
+  user: "root"
+  password: "admin"
+  dbname: "salesforce_account"

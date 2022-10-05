@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="salesforce_account_sample" format="json">
+      <types:shape format="weave" example="examples/salesforce_sample.json"><![CDATA[%dw 2.0
+
+type salesforce_account_sample = Array<{|  country: String,   city: String,   postalcode: String,   accountno: String,   name: String|}> {"example": "[{\\\"country\\\":\\\"USA\\\",\\\"city\\\":\\\"Burlington\\\",\\\"postalcode\\\":\\\"27215\\\",\\\"accountno\\\":\\\"CD656092\\\",\\\"name\\\":\\\"Burlington Textiles Corp of America\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#391d4499-b2e4-4c06-96d6-b0fd6548490f"/>
+  <types:enrichment select="#8e25b79d-633d-4377-8184-bef8c423a7cb">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="salesforce_account_sample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

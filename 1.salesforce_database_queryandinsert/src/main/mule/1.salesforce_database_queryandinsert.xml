@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="1.salesforce_database_queryandinsertFlow" doc:id="cefb8724-6a07-498a-a1a5-30ba43dad89e" >
+		<http:listener doc:name="GET /account" doc:id="127bd47a-e9a8-4ef5-a4a5-3392b62d821b" path="${http.path}" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
+		<salesforce:query doc:name="Account" doc:id="223dd582-0b78-4baf-ac56-a2ffed297195" config-ref="Salesforce_Account">
+			<salesforce:salesforce-query ><![CDATA[SELECT AccountNumber,BillingCity,BillingCountry,BillingPostalCode,Name FROM Account WHERE AccountNumber = ':acc']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	acc : attributes.queryParams.acc
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<set-variable value="#[payload]" doc:name="Account" doc:id="6bbae4db-8c8a-41a7-8be8-e99659f6168a" variableName="account"/>
+		<ee:transform doc:name="Array - Json" doc:id="391d4499-b2e4-4c06-96d6-b0fd6548490f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert_salesforceAccount_Database" doc:id="87354b88-d43d-4704-89df-f1825a15b136" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO account VALUES(:acc, :city, :country, :postal, :name)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'acc': payload.AccountNumber,
+	'city': payload.BillingCity,
+	'country': payload.BillingCountry,
+	'postal': payload.BillingPostalCode,
+	'name': payload.Name
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Map Payload" doc:id="8e25b79d-633d-4377-8184-bef8c423a7cb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.account map ( account , indexOfAccount ) -> {
+	country: account.BillingCountry default "",
+	city: account.BillingCity default "",
+	postalcode: account.BillingPostalCode default "",
+	accountno: account.AccountNumber default "",
+	name: account.Name default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="de703a65-2cf7-4785-b3c4-4f0e81234b66" />
+	</flow>
+</mule>
